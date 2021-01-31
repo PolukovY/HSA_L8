@@ -1,14 +1,16 @@
 ##setup
 
-
+```
 SET autocommit=0;
 SET GLOBAL innodb_status_output=ON;
 SET GLOBAL innodb_status_output_locks=ON;
+```
 
 ##init
 
 run init.sql
 
+```
 drop table accounts;
 create table if not exists accounts
 (
@@ -22,12 +24,13 @@ create table if not exists accounts
 insert into accounts (login, balance) values ('petya', 1000);
 insert into accounts (login, balance) values ('vasya', 2000);
 insert into accounts (login, balance) values ('mark', 500);
-
+```
 
 #Read uncommitted
 
 ## T1
 
+```
 start transaction ;
 
 select * from accounts;
@@ -38,14 +41,17 @@ delete from accounts where login = 'vasya';
 update accounts set balance = 1500 where login = 'petya';
 
 rollback ;
+```
 
 ## T2
 
+```
 start transaction ;
 
 select * from accounts;
 
 select sum(balance) from accounts;
+```
 
 T2 see uncommitted data and could do wrong logic. After T1 rollback T2 sum will be changed.
 
@@ -53,6 +59,7 @@ T2 see uncommitted data and could do wrong logic. After T1 rollback T2 sum will 
 
 ##T1
 
+```
 start transaction ;
 
 select * from accounts;
@@ -67,9 +74,11 @@ select * from accounts;
 select sum(balance) from accounts;
 
 commit;
+```
 
 ##T2
 
+```
 start transaction ;
 
 select * from accounts;
@@ -77,11 +86,13 @@ select * from accounts;
 select sum(balance) from accounts;
 
 T2 doesn't see uncommitted data, after commit T2 see new data. T1 sees his local data.
+```
 
 #Repeatable read
 
 ##T1
 
+```
 start transaction ;
 
 select * from accounts;
@@ -95,9 +106,11 @@ select * from accounts;
 select sum(balance) from accounts;
 
 commit;
+```
 
 ##T2
 
+```
 start transaction ;
 
 select * from accounts;
@@ -106,6 +119,7 @@ update accounts set balance = 2000 where login = 'vasya';
 select sum(balance) from accounts;
 
 commit ;
+```
 
 T2 will wait until T2 commits or rollback changes.
 
